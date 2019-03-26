@@ -1,0 +1,198 @@
+<canvas id='c' width='600' height='600'></canvas>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+
+    html,
+    body {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgb(30, 30, 30);
+    }
+</style>
+<script>
+    var ctx = document.getElementById('c').getContext('2d')
+
+    var rand = (min, max) => Math.floor(min + Math.random() * (max + 1 - min));
+
+    function clear() {
+        ctx.fillStyle = '#303030';
+        ctx.fillRect(0, 0, 600, 600);
+        let klx = 0;
+        let kly = 0;
+        for (var i = 0; i <= 450; i++) {
+            ctx.fillStyle = '#353535';
+            ctx.fillRect(klx, kly, 25, 25);
+            klx += 50;
+            if (klx == 600) {
+                klx = 25;
+                kly += 25;
+            }
+            if (klx > 600) {
+                klx = 0;
+                kly += 25;
+            }
+        }
+    }
+
+    var px = 100;
+    var py = 250;
+
+    var hs = 0;
+    var vs = 0;
+
+
+    function isInteger(num) {
+        return (num ^ 0) === num;
+    }
+
+    function move() {
+        if (isInteger(px / 2) == true && isInteger(py / 2) == true) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    window.onkeydown = function(event) {
+        if (event.keyCode == 37 && hs != 25) {
+            hs = -25;
+            vs = 0;
+        }
+        if (event.keyCode == 38 && vs != 25) {
+            hs = 0;
+            vs = -25;
+        }
+        if (event.keyCode == 39 && hs != -25) {
+            hs = 25;
+            vs = 0;
+        }
+        if (event.keyCode == 40 && vs != -25) {
+            hs = 0;
+            vs = 25;
+        }
+    }
+
+    var snake = [{
+        x: 0,
+        y: 0
+    }, {
+        x: 0,
+        y: 0
+    }];
+
+    var apx = 350;
+    var apy = 250;
+
+    var apm = [];
+    for (var i = 50; i < 600; i += 25) {
+        apm.push(i)
+    }
+
+    function dead() {
+        snake = [{
+            x: 0,
+            y: 0
+        }, {
+            x: 0,
+            y: 0
+        }];
+        score = snake.length - 1;
+        px = 100;
+        py = 250;
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, 600, 600);
+        hs = 0;
+        vs = 0;
+    }
+
+    function newap() {
+        apx = apm[rand(0, apm.length - 1)];
+        apy = apm[rand(0, apm.length - 1)];
+    }
+
+    var score = snake.length - 1;
+
+    function draw() {
+        clear();
+
+        px += hs;
+        py += vs;
+        if (px > 600 || px <= 0 || py > 600 || py <= 0) {
+            dead();
+        }
+        if (px == apx && py == apy) {
+            snake.push({
+                x: -50,
+                y: -50
+            });
+            newap();
+            score = snake.length - 1;
+        }
+
+        ctx.fillStyle = '#ccc';
+        ctx.beginPath();
+        ctx.arc(apx - 12.5, apy - 12.5, 12.5, 0, Math.PI * 2, 1);
+        ctx.fill();
+
+        snake[0].x = px;
+        snake[0].y = py;
+
+        for (var i = snake.length - 1; i > 0; i--) {
+            snake[i].x = snake[i - 1].x;
+            snake[i].y = snake[i - 1].y;
+        }
+
+        for (var i = 0; i < snake.length; i++) {
+            ctx.fillStyle = "#" + (255 - i).toString(16) + (255 - i).toString(16) + (255 - i).toString(16);
+            ctx.fillRect(snake[i].x - 25, snake[i].y - 25, 25, 25);
+            if (px == snake[i].x && py == snake[i].y && i > 1) {
+                dead();
+            }
+        }
+        ctx.fillStyle = '#ccc';
+        ctx.font = '15px Monospace';
+        ctx.fillText("score: " + score, 15, 15);
+
+    }
+
+    function nav() {
+        ctx.beginPath();
+        ctx.strokeStyle = 'red';
+        ctx.moveTo(apx - 12.5, apy - 12.5);
+        ctx.lineTo(apx - 12.5, py - 12.5);
+        ctx.lineTo(px - 12.5, py - 12.5);
+        ctx.stroke();
+
+        if (px < apx) {
+            hs = 25;
+            vs = 0;
+        }
+
+        if (px > apx) {
+            hs = -25;
+            vs = 0;
+        }
+
+        if (px == apx) {
+            if (apy > py) {
+                hs = 0;
+                vs = 25;
+            }
+            if (apy < py) {
+                hs = 0;
+                vs = -25;
+            }
+        }
+
+    }
+
+    setInterval(draw, 1000 / 15);
+    //setInterval(nav, 1000 / 15);
+</script>
